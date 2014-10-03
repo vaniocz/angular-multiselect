@@ -240,17 +240,40 @@ angular.module('ui.multiselect', [])
       };
     }])
 
-  .directive('multiselectPopup', ['$document', function ($document) {
+  .directive('multiselectPopup', ['$document', 'multiselectConfig', function ($document, multiselectConfig) {
     return {
       restrict: 'E',
       scope: false,
       replace: true,
-      templateUrl: function (element, attr) {
-                return attr.templateUrl || 'multiselect.tmpl.html';
-        },
+      template:
+      '<div class="btn-group">' +
+      '  <button type="button" class="btn btn-default dropdown-toggle" ng-click="toggleSelect()" ng-disabled="disabled" ng-class="{\'error\': !valid()}">' +
+      '    {{header}} <span class="caret"></span>' +
+      '  </button>' +
+      '  <ul class="dropdown-menu">' +
+      '    <li>' +
+      '      <input class="form-control input-sm" type="text" ng-model="searchText.label" autofocus="autofocus" placeholder="{{definitions.filter}}" />' +
+      '    </li>' +
+      '    <li ng-show="multiple" role="presentation" class="">' +
+      '      <button class="btn btn-link btn-xs" ng-click="checkAll()" type="button"><i class="glyphicon glyphicon-ok"></i> {{definitions.checkAll}}</button>' +
+      '      <button class="btn btn-link btn-xs" ng-click="uncheckAll()" type="button"><i class="glyphicon glyphicon-remove"></i> {{definitions.uncheckAll}}</button>' +
+      '    </li>' +
+      '    <li ng-repeat="i in items | filter:searchText">' +
+      '      <a ng-click="select(i);">' +
+      '        <i class="glyphicon" ng-class="{\'glyphicon-ok\': i.checked, \'empty\': !i.checked}"></i> {{i.label}}</a>' +
+      '    </li>' +
+      '  </ul>' +
+      '</div>',
+//      templateUrl: function (element, attr) {
+//                return attr.templateUrl || 'bower_components/amitava82/angular-multiselect/src/multiselect.tmpl.html';
+//        },
       link: function (scope, element, attrs) {
-
+        scope.definitions = multiselectConfig.definitions;
         scope.isVisible = false;
+
+        element.find('ul').on('click', function(event) {
+          event.stopPropagation();
+        });
 
         scope.toggleSelect = function () {
           if (element.hasClass('open')) {
@@ -284,4 +307,12 @@ angular.module('ui.multiselect', [])
         }
       }
     }
-  }]);
+  }])
+  
+  .constant('multiselectConfig', {
+    definitions: {
+      filter: 'Filter',
+      checkAll: 'Check all',
+      uncheckAll: 'Uncheck all'
+    }
+  });

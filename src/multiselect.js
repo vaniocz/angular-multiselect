@@ -140,7 +140,14 @@ angular.module('ui.multiselect', [])
             } else {
               var local = {};
               local[parsedResult.itemName] = modelCtrl.$modelValue;
-              scope.header = parsedResult.viewMapper(local) || scope.items[modelCtrl.$modelValue].label;
+              scope.header = parsedResult.viewMapper(local);
+              if (!scope.header) {
+		angular.forEach(scope.items, function(item) {
+			if (item.model === modelCtrl.$modelValue) {
+				scope.header = item.label;
+			}
+		});
+	      }
             }
           }
           
@@ -271,9 +278,11 @@ angular.module('ui.multiselect', [])
         scope.definitions = multiselectConfig.definitions;
         scope.isVisible = false;
 
-        element.find('ul').on('click', function(event) {
-          event.stopPropagation();
-        });
+        if (scope.multiple) {
+	  element.find('ul').on('click', function(event) {
+	    event.stopPropagation();
+	  });
+	}
 
         scope.toggleSelect = function () {
           if (element.hasClass('open')) {
